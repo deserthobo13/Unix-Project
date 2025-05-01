@@ -1,3 +1,3 @@
 #! /bin/bash
 
-htop
+htop -d 10
