@@ -1,40 +1,30 @@
-#! /bin/bash
+#!/bin/bash
 
-cpu_usage(){
-    echo "====CPU Usage===="
-    echo "$(top -bn1 | grep "Cpu(s)")"
-}
+# system_metrics.sh
+# Displays basic system metrics: CPU, memory, disk, and processes
 
-memory_usage(){
-    echo "====Memory Usage===="
-    echo "$(free -h)"
-}
+echo "==============================="
+echo "     Diagnostics Dashboard     "
+echo "==============================="
 
-disk_space(){
-    echo "====Disk Space===="
-    echo "$(df -h)"
-}
+# CPU Usage (top -bn1 gives snapshot, grep 'Cpu' extracts CPU line)
+echo -e "\n CPU Usage:"
+top -bn1 | grep "Cpu(s)" | \
+  awk '{printf "User: %.1f%%, System: %.1f%%, Idle: %.1f%%\n", $2, $4, $8}'
 
-running_processes(){
-    echo "====Running Processes===="
-    echo "$(ps aux)"
-}
+# Memory Usage (from free -h)\]
+echo -e "\n Memory Usage:"
+free -h
 
-while true; do
-    echo "====System Diagnostics===="
-    echo "1. CPU Usage"
-    echo "2. Memory Usage"
-    echo "3. Disk Space"
-    echo "4. Running Processes"
-    echo "5. Exit"
-    read -p "Select an option: " option
+# Disk Usage (from df -h)
+echo -e "\n Disk Usage:"
+df -h | grep -E '^/dev/'  # Only actual disk partitions
 
-    case $option in
-        1) cpu_usage ;;
-        2) memory_usage ;;
-        3) disk_space ;;
-        4) running_processes ;;
-        5) exit ;;
-        *) echo "Invalid option" ;;
-    esac
-done
+# Running Processes (from ps)
+echo -e "\n Top 5 Memory-Consuming Processes:"
+ps aux --sort=-%mem | awk 'NR<=6{printf "%-10s %-5s %-5s %s\n", $1, $2, $4, $11}'
+
+echo -e "\n Top 5 CPU-Consuming Processes:"
+ps aux --sort=-%cpu | awk 'NR<=6{printf "%-10s %-5s %-5s %s\n", $1, $2, $3, $11}'
+
+echo "==============================="
